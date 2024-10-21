@@ -61,7 +61,7 @@ await sh.get("https://huggingface.co", domain_whitelist=PUBLIC_HOSTNAME_WHITELIS
 ### Custom Transports (Advanced)
 
 If you know what you are doing, and what to pass in a custom instance of
-`httpx.AsyncBaseTransport`, you can use the `_transport` parameter. Setting
+`httpx.AsyncBaseTransport`, you can use the `_transport` parameter in `sh.get()`. Setting
 this to `False` explicitly will use no secure transport (effectively 
 making `sh.get` equivalent to `httpx.AsyncClient.get()`).
 
