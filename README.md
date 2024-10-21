@@ -63,6 +63,6 @@ making `sh.get` equivalent to `httpx.AsyncClient.get()`).
 
 ## More Information
 
-This library was created as a result of Trail of Bits' security audit of Gradio 5 (Hugging Face), and is used [in the Gradio library](https://github.com/gradio-app/gradio/) to make secure requests to arbitrary user-specified URLs. We are releasing this as a standalone library so that other developers can benefit from our learnings.
+This library was created as a result of Trail of Bits' security audit of Gradio 5 (Hugging Face), and is used [in the Gradio library](https://github.com/gradio-app/gradio/) to make secure requests to arbitrary user-specified URLs. We are releasing this as a standalone library so that other developers can benefit from our learnings. In the interest of transparency and the spirit of open-source, we are making the [full security audit public](https://github.com/trailofbits/publications/blob/master/reviews/2024-10-huggingface-gradio-securityreview.pdf).
 
 If you find a security issue in this library, please email the Gradio team at `gradio-team@huggingface.co`. Thanks!
