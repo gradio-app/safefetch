@@ -102,6 +102,16 @@ async def get(
     _transport: httpx.AsyncBaseTransport | Literal[False] | None = None,
     **kwargs,
 ) -> httpx.Response:
+    """
+    This is the main function that should be used to make async HTTP GET requests.
+    It will automatically use a secure transport for non-whitelisted domains.
+
+    Parameters:
+    - url (str): The URL to make a GET request to.
+    - domain_whitelist (list[str] | None): A list of domains to whitelist, which will not use a secure transport.
+    - _transport (httpx.AsyncBaseTransport | Literal[False] | None): A custom transport to use for the request. Takes precedence over domain_whitelist.
+    - **kwargs: Additional keyword arguments to pass to the httpx.AsyncClient.get() function.
+    """
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname
     if not hostname:
