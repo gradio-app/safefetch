@@ -1,4 +1,4 @@
-# safefetch
+# safehttpx
 
 A small utility library that is designed to make asynchronous GET requests in a manner that is robust to SSRF attacks
 

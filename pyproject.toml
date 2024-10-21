@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "safefetch"
+name = "safehttpx"
 version = "0.1.0"
 description = "A Python package for replicating Gradio applications"
 authors = [
@@ -21,12 +21,12 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://github.com/gradio-app/safefetch"
-repository = "https://github.com/gradio-app/safefetch"
+homepage = "https://github.com/gradio-app/safehttpx"
+repository = "https://github.com/gradio-app/safehttpx"
 
 [project.optional-dependencies]
 dev = ["pytest"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["safefetch"]
+packages = ["safehttpx"]
 
