@@ -16,7 +16,7 @@ Server Side Request Forgery (SSRF) attacks can be particularly dangerous as they
 $ pip install safehttpx
 ```
 
-*Basic Usage**
+### Basic Usage
 
 ```py
 import safehttpx as sh
