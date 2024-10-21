@@ -109,7 +109,7 @@ async def get(
     Parameters:
     - url (str): The URL to make a GET request to.
     - domain_whitelist (list[str] | None): A list of domains to whitelist, which will not use a secure transport.
-    - _transport (httpx.AsyncBaseTransport | Literal[False] | None): A custom transport to use for the request. Takes precedence over domain_whitelist.
+    - _transport (httpx.AsyncBaseTransport | Literal[False] | None): A custom transport to use for the request. Takes precedence over domain_whitelist. Set to False to use no transport.
     - **kwargs: Additional keyword arguments to pass to the httpx.AsyncClient.get() function.
     """
     parsed_url = urlparse(url)
@@ -121,7 +121,7 @@ async def get(
     
     if _transport:
         transport = _transport
-    elif hostname in domain_whitelist:
+    elif _transport is False or hostname in domain_whitelist:
         transport = None
     else:
         verified_ip = await async_validate_url(url)
