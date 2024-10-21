@@ -100,7 +100,7 @@ async def get(
     url: str, 
     domain_whitelist: list[str] | None = None,
     _transport: httpx.AsyncBaseTransport | Literal[False] | None = None,
-    *kwargs: Any,
+    **kwargs,
 ) -> httpx.Response:
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname

@@ -6,8 +6,15 @@ A small utility Python created to help developers protect their applications fro
 
 * **Basic Usage**
 
+```py
+import safehttpx as sh
 
+await sh.get("https://huggingface.co")
+>>> <Response [200 OK]>
 
+await sh.get("https://huggingface.co")
+>>> ValueError: Hostname 127.0.0.1 failed validation
+```
 
 * d
 
