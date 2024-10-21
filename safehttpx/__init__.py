@@ -1,1 +1,121 @@
+import httpx
+import ssl
+from typing import Any, Callable, Coroutine, Awaitable, T, Literal
+from functools import lru_cache, wraps
+import asyncio
+import socket
+from urllib.parse import urlparse
+import ipaddress
+
 __version__ = "0.0.1"
+
+def is_public_ip(ip: str) -> bool:
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        return not (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_multicast
+            or ip_obj.is_reserved
+        )
+    except ValueError:
+        return False
+
+def lru_cache_async(maxsize: int = 128):
+    def decorator(
+        async_func: Callable[..., Coroutine[Any, Any, T]],
+    ) -> Callable[..., Awaitable[T]]:
+        @lru_cache(maxsize=maxsize)
+        @wraps(async_func)
+        def wrapper(*args: Any, **kwargs: Any) -> Awaitable[T]:
+            return asyncio.create_task(async_func(*args, **kwargs))
+
+        return wrapper
+
+    return decorator
+
+@lru_cache_async(maxsize=256)
+async def async_resolve_hostname_google(hostname: str) -> list[str]:
+    async with httpx.AsyncClient() as client:
+        try:
+            response_v4 = await client.get(
+                f"https://dns.google/resolve?name={hostname}&type=A"
+            )
+            response_v6 = await client.get(
+                f"https://dns.google/resolve?name={hostname}&type=AAAA"
+            )
+
+            ips = []
+            for response in [response_v4.json(), response_v6.json()]:
+                ips.extend([answer["data"] for answer in response.get("Answer", [])])
+            return ips
+        except Exception:
+            return []
+
+async def async_validate_url(url: str) -> str:
+    hostname = urlparse(url).hostname
+    if not hostname:
+        raise ValueError(f"URL {url} does not have a valid hostname")
+    try:
+        loop = asyncio.get_event_loop()
+        addrinfo = await loop.getaddrinfo(hostname, None)
+    except socket.gaierror as e:
+        raise ValueError(f"Unable to resolve hostname {hostname}: {e}") from e
+
+    for family, _, _, _, sockaddr in addrinfo:
+        ip_address = sockaddr[0]
+        if family in (socket.AF_INET, socket.AF_INET6) and is_public_ip(ip_address):
+            return ip_address
+
+    for ip_address in await async_resolve_hostname_google(hostname):
+        if is_public_ip(ip_address):
+            return ip_address
+
+    raise ValueError(f"Hostname {hostname} failed validation")
+
+class AsyncSecureTransport(httpx.AsyncHTTPTransport):
+    def __init__(self, verified_ip: str):
+        self.verified_ip = verified_ip
+        super().__init__()
+
+    async def connect(
+        self,
+        hostname: str,
+        port: int,
+        _timeout: float | None = None,
+        ssl_context: ssl.SSLContext | None = None,
+        **_kwargs: Any,
+    ):
+        loop = asyncio.get_event_loop()
+        sock = await loop.getaddrinfo(self.verified_ip, port)
+        sock = socket.socket(sock[0][0], sock[0][1])
+        await loop.sock_connect(sock, (self.verified_ip, port))
+        if ssl_context:
+            sock = ssl_context.wrap_socket(sock, server_hostname=hostname)
+        return sock
+
+
+async def get(
+    url: str, 
+    domain_whitelist: list[str] | None = None,
+    _transport: httpx.AsyncBaseTransport | Literal[False] | None = None,
+    *kwargs: Any,
+) -> httpx.Response:
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    if not hostname:
+        raise ValueError(f"URL {url} does not have a valid hostname")
+    if domain_whitelist is None:
+        domain_whitelist = []
+    
+    if _transport:
+        transport = _transport
+    elif hostname in domain_whitelist:
+        transport = None
+    else:
+        verified_ip = await async_validate_url(url)
+        transport = AsyncSecureTransport(verified_ip)
+    
+    async with httpx.AsyncClient(transport=transport) as client:
+        return await client.get(url, follow_redirects=False, **kwargs)
