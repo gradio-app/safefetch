@@ -65,7 +65,8 @@ If you know what you are doing, and what to pass in a custom instance of
 this to `False` explicitly will use no secure transport (effectively 
 making `sh.get` equivalent to `httpx.AsyncClient.get()`).
 
-### More info
+## More Information
 
-This library was created through joint efforts of Gradio (Hugging Face) and Trail Of Bits as a result of the Trail of Bits' audit of Gradio 5
+This library was created as a result of Trail of Bits' security audit of Gradio 5 (Hugging Face), and is used in the Gradio library to make secure requests to custom, user-specified URLs. We are releasing this as a standalone library so that other developers can benefit from our learnings.
 
+If you find a security issue in this library, please email the Gradio team at `gradio-team@huggingface.co`. Thanks!
