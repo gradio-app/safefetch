@@ -65,16 +65,6 @@ If you know what you are doing, and what to pass in a custom instance of
 this to `False` explicitly will use no secure transport (effectively 
 making `sh.get` equivalent to `httpx.AsyncClient.get()`).
 
-```py
-import safehttpx as sh
-
-PUBLIC_HOSTNAME_WHITELIST = ["hf.co", "huggingface.co"]
-
-await sh.get("https://huggingface.co", )
->>> <Response [200 OK]>
-```
-
-
 ### More info
 
 This library was created through joint efforts of Gradio (Hugging Face) and Trail Of Bits as a result of the Trail of Bits' audit of Gradio 5
