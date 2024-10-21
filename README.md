@@ -36,12 +36,8 @@ The example snippets above will work in environments like IPython or Jupyter not
 import asyncio
 import safehttpx as sh
 
-async def main():
-    response = await sh.get("https://huggingface.co")
-    print(response)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(sh.get("https://huggingface.co"))
+>>> <Response [200 OK]>
 ```
 
 ### Whitelisted Domains
