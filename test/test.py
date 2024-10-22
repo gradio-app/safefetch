@@ -18,6 +18,7 @@ async def test_local_urls_fail(url):
     with pytest.raises(ValueError, match="failed validation"):
         await safehttpx.get(url)
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "url",
