@@ -46,3 +46,12 @@ async def test_domain_whitelist():
 
     with pytest.raises(ValueError, match=FAILED_VALIDATION_ERR_MESSAGE):
         await safehttpx.get("http://192.168.1.250.nip.io", domain_whitelist=["huggingface.co"])
+
+@pytest.mark.asyncio
+async def test_transport_false():
+    try:
+        await safehttpx.get("http://192.168.1.250.nip.io", _transport=False)
+    except ValueError as e:
+        assert FAILED_VALIDATION_ERR_MESSAGE not in str(e)
+    except Exception:
+        pass # Other exeptions (e.g. connection timeouts) are fine
