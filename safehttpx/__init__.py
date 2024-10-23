@@ -4,11 +4,10 @@ import socket
 import ssl
 from functools import lru_cache, wraps
 from typing import Any, Awaitable, Callable, Coroutine, Literal, T
-from urllib.parse import urlparse
 
 import httpx
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 def is_public_ip(ip: str) -> bool:
@@ -25,7 +24,7 @@ def is_public_ip(ip: str) -> bool:
         return False
 
 
-def lru_cache_async(maxsize: int = 128):
+def lru_cache_async(maxsize: int = 256):
     def decorator(
         async_func: Callable[..., Coroutine[Any, Any, T]],
     ) -> Callable[..., Awaitable[T]]:
@@ -39,7 +38,7 @@ def lru_cache_async(maxsize: int = 128):
     return decorator
 
 
-@lru_cache_async(maxsize=256)
+@lru_cache_async
 async def async_resolve_hostname_google(hostname: str) -> list[str]:
     async with httpx.AsyncClient() as client:
         try:
@@ -58,10 +57,7 @@ async def async_resolve_hostname_google(hostname: str) -> list[str]:
             return []
 
 
-async def async_validate_url(url: str) -> str:
-    hostname = urlparse(url).hostname
-    if not hostname:
-        raise ValueError(f"URL {url} does not have a valid hostname")
+async def async_validate_url(hostname: str) -> str:
     try:
         loop = asyncio.get_event_loop()
         addrinfo = await loop.getaddrinfo(hostname, None)
@@ -118,8 +114,8 @@ async def get(
     - _transport (httpx.AsyncBaseTransport | Literal[False] | None): A custom transport to use for the request. Takes precedence over domain_whitelist. Set to False to use no transport.
     - **kwargs: Additional keyword arguments to pass to the httpx.AsyncClient.get() function.
     """
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
+    parsed_url = httpx.URL(url)
+    hostname = parsed_url.host
     if not hostname:
         raise ValueError(f"URL {url} does not have a valid hostname")
     if domain_whitelist is None:
@@ -130,7 +126,7 @@ async def get(
     elif _transport is False or hostname in domain_whitelist:
         transport = None
     else:
-        verified_ip = await async_validate_url(url)
+        verified_ip = await async_validate_url(hostname)
         transport = AsyncSecureTransport(verified_ip)
 
     async with httpx.AsyncClient(transport=transport) as client:
